@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yamlv3"
@@ -23,11 +24,12 @@ type RabbitMQ struct {
 	config   configRmqList
 	conn     *amqp.Connection
 	Delivery <-chan amqp.Delivery
+	Channel  *amqp.Channel
 }
 
-func NewRabbitMq(logger *zap.SugaredLogger) *RabbitMQ {
+func NewRabbitMQ(logger *zap.SugaredLogger) *RabbitMQ {
 	config.AddDriver(yamlv3.Driver)
-	err := config.LoadFiles("pkg/config/config.yaml")
+	err := config.LoadFiles("config/config.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -44,17 +46,18 @@ func NewRabbitMq(logger *zap.SugaredLogger) *RabbitMQ {
 	if err != nil {
 		panic(err)
 	}
-	d := initRabbitMqObjects(logger, connection, configmq)
+	d, ch := initRabbitMqObjects(logger, connection, configmq)
 
 	return &RabbitMQ{
 		logger:   logger,
 		config:   configmq,
 		conn:     connection,
 		Delivery: d,
+		Channel:  ch,
 	}
 }
 
-func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection, configmq configRmqList) <-chan amqp.Delivery {
+func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection, configmq configRmqList) (<-chan amqp.Delivery, *amqp.Channel) {
 	logger.Infow("got Connection, getting Channel")
 	channel, err := connection.Channel()
 	if err != nil {
@@ -108,49 +111,40 @@ func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection,
 	if err != nil {
 		panic(err)
 	}
-	return deliveries
+	return deliveries, channel
 }
 
-func (r *RabbitMQ) Publish(routingKey, body string) error {
-	channel, err := r.conn.Channel() //TODO verify how creating new channel affects performance
-	if err != nil {
-		panic(err)
-	}
-	defer channel.Close()
-	var publishes chan uint64 = nil
-
+// TODO consider use another exachange, will it affect performance?
+func (r *RabbitMQ) Publish(routingKey string, msg interface{}) error {
 	r.logger.Infow("enabling publisher confirms.")
-	if err := channel.Confirm(false); err != nil {
+	if err := r.Channel.Confirm(false); err != nil {
 		return fmt.Errorf("Channel could not be put into confirm mode: %s", err)
 	}
-	// We'll allow for a few outstanding publisher confirms
-	publishes = make(chan uint64, 8)
 
 	r.logger.Infow("declared Exchange, publishing messages")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	seqNo := channel.GetNextPublishSeqNo()
-	r.logger.Infow("publishing %dB body (%q)", len(body), body)
-
-	if err := channel.PublishWithContext(ctx,
+	body, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	if err := r.Channel.PublishWithContext(ctx,
 		r.config.ExchangeName, // publish to an exchange
 		routingKey,            // routing to 0 or more queues
 		false,                 // mandatory
 		false,                 // immediate
 		amqp.Publishing{
-			Headers:         amqp.Table{},
-			ContentType:     "text/plain",
-			ContentEncoding: "",
-			Body:            []byte(body),
-			DeliveryMode:    amqp.Transient, // 1=non-persistent, 2=persistent
-			Priority:        0,              // 0-9
+			Headers:      amqp.Table{},
+			ContentType:  "application/json",
+			Body:         body,
+			DeliveryMode: amqp.Persistent, // 1=non-persistent, 2=persistent
+			//Priority:     0,               // 0-9
 		},
 	); err != nil {
-		return fmt.Errorf("Exchange Publish: %s", err)
+		return fmt.Errorf("exchange Publish: %s", err)
 	}
 
-	r.logger.Infow("published %dB OK", len(body))
-	publishes <- seqNo
+	r.logger.Infow("published OK")
 	return nil
 }
