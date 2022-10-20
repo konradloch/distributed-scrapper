@@ -1,0 +1,6 @@
+rabbitmq:
+  uri: amqp://guest:guest@localhost:5672/
+  exchangeName: test-exchange
+  exchangeType: direct
+  queueName: test-q
+  tag: tag-consumer
