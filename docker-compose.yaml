@@ -1,0 +1,21 @@
+version: '3.5'
+
+services:
+ crdb:
+   image: cockroachdb/cockroach:v19.2.2
+   ports:
+     - "26257:26257"
+     - "8089:8080"
+   command: start-single-node --insecure
+   volumes:
+     - pg-data:/cockroach/cockroach-data
+
+ rabbitmq:
+   container_name: rabbitmq
+   image: rabbitmq:3.8.12-management
+   ports:
+     - 5672:5672
+     - 15672:15672
+
+volumes:
+  pg-data:
