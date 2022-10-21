@@ -1,0 +1,7 @@
+rabbitmq:
+  uri: ${RABBITMQ_URI|amqp://guest:guest@localhost:5672/}
+  exchangeName: scrapper.to.link.manager.event.responses
+  producerExchangeName: link.manager.to.scrapper.event.request
+  exchangeType: direct
+  queueName: site.responses
+  tag: tag-consumer

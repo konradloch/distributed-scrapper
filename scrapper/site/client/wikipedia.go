@@ -35,16 +35,37 @@ func (w *Wiki) GetLinks(webPage string) ([]string, []string, error) {
 		return nil, nil, err
 	}
 	root := w.getLinksFromDocument(doc, true, ".contentsPage__section a")
-	if len(root) > 100 {
+	if len(root) > 700 {
 		w.logger.Infow("content done", "content", webPage, "categories", len(root), "articles", 0)
 		return root, []string{}, nil
 	}
 	categories := w.getLinksFromDocument(doc, true, ".mw-category-group a")
 	articles := w.getLinksFromDocument(doc, false, ".mw-category-group a")
-	fmt.Println(articles)
 	w.logger.Infow("content done", "content", webPage, "categories", len(categories), "articles", len(articles))
 	return categories, articles, nil
 }
+
+//func (w *Wiki) getLinksRoot(webPage string) ([]string, error) {
+//	w.logger.Infow("fetching content", "content", webPage)
+//	resp, err := http.Get(webPage)
+//	if err != nil {
+//		w.logger.Errorf("wiki http get failed")
+//		return nil, err
+//	}
+//	if resp.StatusCode != 200 {
+//		w.logger.Errorf("wiki http get failed cause difrent code")
+//		return nil, fmt.Errorf("error status %d", resp.StatusCode)
+//	}
+//	doc, err := goquery.NewDocumentFromReader(resp.Body)
+//	if err != nil {
+//		w.logger.Errorf("goquery fails")
+//		return nil, err
+//	}
+//	root := w.getLinksFromDocument(doc, true, ".contentsPage__section a")
+//	//TODO send in event info about root
+//	w.logger.Infow("content done", "content", webPage, "categories", len(root), "articles", 0)
+//	return root, nil
+//}
 
 func (w *Wiki) getLinksFromDocument(doc *goquery.Document, isCategory bool, section string) []string {
 	f := func(i int, s *goquery.Selection) bool {

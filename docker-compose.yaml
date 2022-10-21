@@ -17,5 +17,14 @@ services:
      - 5672:5672
      - 15672:15672
 
+ scrapper:
+   container_name: scrapper
+   image: scrapper:b197a08
+   environment:
+     - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
+   depends_on:
+     - rabbitmq
+     - crdb
+
 volumes:
   pg-data:

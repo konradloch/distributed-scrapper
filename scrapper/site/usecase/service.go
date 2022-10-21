@@ -33,6 +33,18 @@ func (s *Service) StartListening() {
 				}
 				return
 			}
+
+			//TODO handle when root
+			//cate, err := s.wiki.GetLinksRoot(e.Url)
+			//if err != nil {
+			//	fmt.Println("message will be nack due to wiki problem")
+			//	err := d.Nack(false, true)
+			//	if err != nil {
+			//		fmt.Println("problem with nack")
+			//	}
+			//	return
+			//}
+
 			cate, arti, err := s.wiki.GetLinks(e.Url)
 			if err != nil {
 				fmt.Println("message will be nack due to wiki problem")

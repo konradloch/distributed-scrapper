@@ -1,6 +1,7 @@
 rabbitmq:
-  uri: amqp://guest:guest@localhost:5672/
-  exchangeName: test-exchange
+  uri: ${RABBITMQ_URI|amqp://guest:guest@localhost:5672/}
+  exchangeName: link.manager.to.scrapper.event.request
+  producerExchangeName: scrapper.to.link.manager.event.responses
   exchangeType: direct
-  queueName: test-q
+  queueName: site.requests
   tag: tag-consumer

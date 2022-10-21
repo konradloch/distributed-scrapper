@@ -106,7 +106,7 @@ func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection,
 
 	if err = channel.QueueBind(
 		queue.Name,            // name of the queue
-		"TEST",                // bindingKey
+		"HANDLE",              // bindingKey
 		configmq.ExchangeName, // sourceExchange
 		false,                 // noWait
 		nil,                   // arguments
@@ -129,7 +129,7 @@ func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection,
 	return deliveries, channel
 }
 
-// TODO consider use another exachange, will it affect performance?
+// TODO consider use another exachange, will it affect performance? - DONE but check performance
 func (r *RabbitMQ) Publish(routingKey string, msg interface{}) error {
 	r.logger.Infow("enabling publisher confirms.")
 	if err := r.Channel.Confirm(false); err != nil {
