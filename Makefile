@@ -1,5 +1,5 @@
 compose-up: ### Run docker-compose
-	docker-compose up --build -d && docker-compose logs -f
+	docker-compose up --build -d --scale scrapper=5 && docker-compose logs -f
 .PHONY: compose-up
 
 compose-down: ### Down docker-compose

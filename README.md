@@ -5,7 +5,17 @@ Used:
 	- Kafka
 	- RabbitMQ
 	- Istio
-	- Drap
+	- Darp
 	- CocroachDB
 	- NoSQL (to choose)
 
+# TODO
+ - Golang opentelemetry and other metrics
+ - CocraochDB optimization
+ - Kafka deployment with kafka-ui
+ - K8s/Helm deployt with charts
+ - Istio
+ - Darp
+ - Keycloak
+ - Cassandra vs CocrachDB vs MongoDB
+ - Telepresence test
