@@ -7,12 +7,14 @@ services:
      - "26257:26257"
      - "8089:8080"
    command: start-single-node --insecure
+   restart: always
    volumes:
      - pg-data:/cockroach/cockroach-data
 
  rabbitmq:
    container_name: rabbitmq
    image: rabbitmq:3.8.12-management
+   restart: always
    ports:
      - 5672:5672
      - 15672:15672
@@ -20,6 +22,7 @@ services:
  scrapper:
    container_name: scrapper
    image: scrapper:b197a08
+   restart: always
    environment:
      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
    depends_on:

@@ -3,5 +3,5 @@ compose-up: ### Run docker-compose
 .PHONY: compose-up
 
 compose-down: ### Down docker-compose
-	docker-compose down --remove-orphans
+	docker-compose down --remove-orphans -v
 .PHONY: compose-down

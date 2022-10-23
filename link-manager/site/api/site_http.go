@@ -25,7 +25,7 @@ func (h *HttpServer) StartServer() {
 }
 
 func (h *HttpServer) PostSite(c echo.Context) error {
-	err := h.service.Publish(c.FormValue("url"))
+	err := h.service.Publish(c.FormValue("url"), "CATEGORY", nil)
 	if err != nil {
 		return err
 	}

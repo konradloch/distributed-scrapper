@@ -131,11 +131,6 @@ func initRabbitMqObjects(logger *zap.SugaredLogger, connection *amqp.Connection,
 
 // TODO consider use another exachange, will it affect performance?
 func (r *RabbitMQ) Publish(routingKey string, msg interface{}) error {
-	r.logger.Infow("enabling publisher confirms.")
-	if err := r.Channel.Confirm(false); err != nil {
-		return fmt.Errorf("Channel could not be put into confirm mode: %s", err)
-	}
-
 	r.logger.Infow("declared Exchange, publishing messages")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
