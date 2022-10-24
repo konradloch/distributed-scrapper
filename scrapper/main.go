@@ -30,12 +30,11 @@ func main() {
 func initTracer(logger *zap.SugaredLogger) func(context.Context) error {
 
 	secureOption := otlptracegrpc.WithInsecure()
-
 	exporter, err := otlptrace.New(
 		context.Background(),
 		otlptracegrpc.NewClient(
 			secureOption,
-			otlptracegrpc.WithEndpoint("localhost:4318"),
+			otlptracegrpc.WithEndpoint("localhost:4317"),
 		),
 	)
 
