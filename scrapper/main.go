@@ -31,7 +31,7 @@ func main() {
 func initTracer(ctx context.Context, logger *zap.SugaredLogger) func(context.Context) error {
 	exporter, err := otlptrace.New(
 		ctx,
-		otlptracegrpc.NewClient(),
+		otlptracegrpc.NewClient(otlptracegrpc.WithEndpoint("otel-collector:4317")),
 	)
 
 	if err != nil {
