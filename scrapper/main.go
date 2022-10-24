@@ -22,26 +22,21 @@ func main() {
 	wiki := client.NewWiki(sugar)
 	broker := broker2.NewRabbitMQ(sugar)
 	service := usecase.NewService(broker, wiki)
-	cleanup := initTracer(sugar)
-	defer cleanup(context.Background())
+	ctx := context.Background()
+	cleanup := initTracer(ctx, sugar)
+	defer cleanup(ctx)
 	service.StartListening()
 }
 
-func initTracer(logger *zap.SugaredLogger) func(context.Context) error {
-
-	secureOption := otlptracegrpc.WithInsecure()
+func initTracer(ctx context.Context, logger *zap.SugaredLogger) func(context.Context) error {
 	exporter, err := otlptrace.New(
-		context.Background(),
-		otlptracegrpc.NewClient(
-			secureOption,
-			otlptracegrpc.WithEndpoint("localhost:4317"),
-		),
+		ctx,
+		otlptracegrpc.NewClient(),
 	)
 
 	if err != nil {
 		logger.Fatal(err)
 	}
-
 	otel.SetTracerProvider(
 		sdktrace.NewTracerProvider(
 			sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -49,6 +44,7 @@ func initTracer(logger *zap.SugaredLogger) func(context.Context) error {
 			sdktrace.WithResource(newResource()),
 		),
 	)
+
 	return exporter.Shutdown
 }
 
