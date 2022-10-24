@@ -140,7 +140,7 @@ services:
       - 15672:15672
 
   scrapper:
-    image: scrapper:f9b928b
+    image: scrapper:fb5e806
     restart: always
     environment:
       - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
