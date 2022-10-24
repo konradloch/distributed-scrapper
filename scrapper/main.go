@@ -13,6 +13,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -29,9 +30,10 @@ func main() {
 }
 
 func initTracer(ctx context.Context, logger *zap.SugaredLogger) func(context.Context) error {
+	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
 	exporter, err := otlptrace.New(
 		ctx,
-		otlptracegrpc.NewClient(otlptracegrpc.WithEndpoint("https://otel-collector:4317")),
+		otlptracegrpc.NewClient(secureOption, otlptracegrpc.WithEndpoint("otel-collector:4317")),
 	)
 
 	if err != nil {
